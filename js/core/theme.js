@@ -37,42 +37,126 @@ document.addEventListener('DOMContentLoaded', () => {
   // ===============================
   // 4. FUNSI APPLY TEMA
   // ===============================
-  function applyTheme() {
-    document.body.classList.toggle('dark-mode', isDark);
+  function applyTheme(withAnimation = true) {
+    document.body.classList.toggle("dark-mode", isDark);
     updateTabColor();
 
-    if (toggleBtn) {
-      toggleBtn.innerHTML = `<i data-feather="${isDark ? 'sun' : 'moon'}"></i>`;
-      if (window.feather) feather.replace();
+    if (!toggleBtn) return;
+
+    // ===============================
+    // TANPA ANIMASI (LOAD AWAL)
+    // ===============================
+    if (!withAnimation) {
+      toggleBtn.innerHTML = `<i data-feather="${isDark ? "sun" : "moon"}"></i>`;
+      feather.replace();
+      return;
     }
+
+    const svg = toggleBtn.querySelector("svg");
+
+    if (!svg) {
+      toggleBtn.innerHTML = `<i data-feather="${isDark ? "sun" : "moon"}"></i>`;
+      feather.replace();
+      return;
+    }
+
+    const paths = svg.querySelectorAll("path, line, circle, polyline");
+
+    const tl = gsap.timeline({ defaults: { ease: "power2.inOut" } });
+
+    // ===============================
+    // ROTASI & SCALE KELUAR (PELAN)
+    // ===============================
+    tl.to(svg, {
+      rotation: isDark ? -180 : 180,
+      scale: 0.5,               // mengecil dulu
+      transformOrigin: "50% 50%",
+      duration: 0.6
+    }, 0);
+
+    paths.forEach(el => {
+      const length = el.getTotalLength();
+      gsap.set(el, { strokeDasharray: length, strokeDashoffset: 0 });
+
+      tl.to(el, {
+        strokeDashoffset: length,
+        duration: 0.45,
+        ease: "power4.in"
+      }, 0);
+    });
+
+    // ===============================
+    // GANTI ICON
+    // ===============================
+    tl.add(() => {
+      toggleBtn.innerHTML = `<i data-feather="${isDark ? "sun" : "moon"}"></i>`;
+      feather.replace();
+    });
+
+    // ===============================
+    // ROTASI MASUK + SCALE NORMAL (SOFT)
+    // ===============================
+    tl.add(() => {
+      const newSvg = toggleBtn.querySelector("svg");
+      if (!newSvg) return;
+
+      const newPaths = newSvg.querySelectorAll("path, line, circle, polyline");
+
+      gsap.set(newSvg, {
+        rotation: isDark ? 180 : -180,
+        scale: 0.7,               // mulai dari kecil
+        transformOrigin: "50% 50%"
+      });
+
+      newPaths.forEach(el => {
+        const length = el.getTotalLength();
+        gsap.set(el, { strokeDasharray: length, strokeDashoffset: length });
+
+        gsap.to(el, {
+          strokeDashoffset: 0,
+          duration: 0.5,
+          ease: "power4.out"
+        });
+      });
+
+      gsap.to(newSvg, {
+        rotation: 0,
+        scale: 1,                  // kembali ke normal
+        duration: 0.8,
+        ease: "elastic.out(1, 0.9)" // efek lebih soft dan cinematic
+      });
+    });
   }
 
   // ===============================
   // 5. TOGGLE BUTTON MANUAL
   // ===============================
   if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
+    toggleBtn.addEventListener("click", () => {
       isDark = !isDark;
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-      applyTheme();
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+      applyTheme(true); // 🔥 animasi aktif
     });
   }
+
 
   // ===============================
   // 6. SISTEM DARK/LIGHT MODE OTOMATIS
   // ===============================
-  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-  mediaQuery.addEventListener('change', e => {
+  const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  mediaQuery.addEventListener("change", e => {
     if (!storedTheme) {
       isDark = e.matches;
-      applyTheme();
+      applyTheme(false);
     }
   });
+
 
   // ===============================
   // 7. APPLY TEMA AWAL
   // ===============================
-  applyTheme();
+  applyTheme(false); // ❗ tanpa animasi
+
 });
 
 // ===============================
