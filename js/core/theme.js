@@ -38,15 +38,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // 4. FUNSI APPLY TEMA
   // ===============================
   function applyTheme(withAnimation = true) {
-    document.body.classList.toggle("dark-mode", isDark);
-    updateTabColor();
-
     if (!toggleBtn) return;
 
+    updateTabColor();
+
     // ===============================
-    // TANPA ANIMASI (LOAD AWAL)
+    // LOAD AWAL (TANPA ANIMASI)
     // ===============================
     if (!withAnimation) {
+      document.body.classList.toggle("dark-mode", isDark);
       toggleBtn.innerHTML = `<i data-feather="${isDark ? "sun" : "moon"}"></i>`;
       feather.replace();
       return;
@@ -62,21 +62,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const paths = svg.querySelectorAll("path, line, circle, polyline");
 
-    const tl = gsap.timeline({ defaults: { ease: "power2.inOut" } });
+    const tl = gsap.timeline({
+      defaults: { ease: "power2.inOut" }
+    });
 
     // ===============================
-    // ROTASI & SCALE KELUAR (PELAN)
+    // SWITCH THEME (CENTERED RIPPLE)
+    // ===============================
+    tl.add(() => {
+      const r = toggleBtn.getBoundingClientRect();
+      document.documentElement.style.setProperty("--rx", `${r.left + r.width / 1}px`);
+      document.documentElement.style.setProperty("--ry", `${r.top + r.height / 1}px`);
+
+      if (document.startViewTransition) {
+        document.startViewTransition(() => {
+          document.body.classList.toggle("dark-mode", isDark);
+        });
+      } else {
+        document.body.classList.toggle("dark-mode", isDark);
+      }
+    });
+
+    // ===============================
+    // ICON KELUAR (ROTATE + DRAW OUT)
     // ===============================
     tl.to(svg, {
       rotation: isDark ? -180 : 180,
-      scale: 0.5,               // mengecil dulu
-      transformOrigin: "50% 50%",
-      duration: 0.6
+      scale: 0.5,
+      duration: 0.6,
+      transformOrigin: "50% 50%"
     }, 0);
 
     paths.forEach(el => {
       const length = el.getTotalLength();
-      gsap.set(el, { strokeDasharray: length, strokeDashoffset: 0 });
+      gsap.set(el, {
+        strokeDasharray: length,
+        strokeDashoffset: 0
+      });
 
       tl.to(el, {
         strokeDashoffset: length,
@@ -94,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ===============================
-    // ROTASI MASUK + SCALE NORMAL (SOFT)
+    // ICON MASUK (DRAW + SOFT ELASTIC)
     // ===============================
     tl.add(() => {
       const newSvg = toggleBtn.querySelector("svg");
@@ -104,13 +126,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
       gsap.set(newSvg, {
         rotation: isDark ? 180 : -180,
-        scale: 0.7,               // mulai dari kecil
+        scale: 0.7,
         transformOrigin: "50% 50%"
       });
 
       newPaths.forEach(el => {
         const length = el.getTotalLength();
-        gsap.set(el, { strokeDasharray: length, strokeDashoffset: length });
+        gsap.set(el, {
+          strokeDasharray: length,
+          strokeDashoffset: length
+        });
 
         gsap.to(el, {
           strokeDashoffset: 0,
@@ -121,12 +146,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       gsap.to(newSvg, {
         rotation: 0,
-        scale: 1,                  // kembali ke normal
+        scale: 1,
         duration: 0.8,
-        ease: "elastic.out(1, 0.9)" // efek lebih soft dan cinematic
+        ease: "elastic.out(1, 0.9)"
       });
     });
   }
+
 
   // ===============================
   // 5. TOGGLE BUTTON MANUAL
@@ -155,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ===============================
   // 7. APPLY TEMA AWAL
   // ===============================
-  applyTheme(false); // ❗ tanpa animasi
+  applyTheme(false);
 
 });
 

@@ -1,4 +1,34 @@
 /* =========================================================
+   VIEW TRANSITION RADIAL REVEAL
+   ========================================================= */
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 1.4s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-new(root) {
+  clip-path: circle(0% at var(--rx, 50%) var(--ry, 50%));
+  animation-name: reveal;
+}
+
+::view-transition-old(root) {
+  clip-path: circle(150% at var(--rx) var(--ry));
+  animation: reveal;
+}
+
+@keyframes reveal {
+  to {
+    clip-path: circle(150% at var(--rx, 50%) var(--ry, 50%));
+  }
+}
+
+html {
+  overflow-x: hidden;
+}
+
+/* =========================================================
    CSS VARIABLES (THEME COLORS)
    ========================================================= */
 :root {
@@ -479,7 +509,8 @@ nav:not(.compact) button span {
   align-items: center;
   gap: 6px;
   padding: 0 14px;
-  height: 40px; /* ⬅️ ubah dari 30px */
+  height: 40px;
+  /* ⬅️ ubah dari 30px */
   border-radius: 999px;
   border: 1px solid var(--light-border);
   background: var(--light-bg);

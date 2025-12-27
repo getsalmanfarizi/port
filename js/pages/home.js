@@ -2,7 +2,7 @@
 // THEME TOGGLE SCROLL STATE
 // ===================================
 const themeToggleButton = document.querySelector(".theme-toggle button");
-const triggerSection = document.querySelector("#home");
+const triggerSection = document.querySelector("#home"); // ganti id section
 
 function handleScroll() {
     const sectionBottom = triggerSection.offsetTop + triggerSection.offsetHeight;
@@ -16,6 +16,7 @@ function handleScroll() {
 
 window.addEventListener("scroll", handleScroll, { passive: true });
 handleScroll();
+
 
 // ===================================
 // GSAP REGISTER
